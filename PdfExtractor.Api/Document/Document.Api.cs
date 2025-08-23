@@ -1,6 +1,8 @@
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using PdfExtractor.Api.Configuration;
 using PdfExtractor.Api.Data;
+using PdfExtractor.Api.Jobs;
 
 namespace PdfExtractor.Api.Document
 {
@@ -13,7 +15,10 @@ namespace PdfExtractor.Api.Document
 
             group.MapPost(
                 "/upload",
-                async ([FromForm] DocumentUploadRequest request, PdfExtractorContext dbContext) =>
+                async (
+                    [FromForm] DocumentUploadRequest request,
+                    PdfExtractorContext dbContext,
+                    IBackgroundJobClient backgroundJobClient) =>
             {
                 if (request.File == null || request.File.Length == 0)
                 {
@@ -45,6 +50,7 @@ namespace PdfExtractor.Api.Document
                 };
                 dbContext.Set<Entities.Document>().Add(document);
                 await dbContext.SaveChangesAsync();
+                backgroundJobClient.Enqueue<IPdfProcessor>(x => x.ProcessPdfAsync(storeFileName));
 
                 return Results.Ok(new DocumentResponse($"Uploaded file {request.File.FileName} successfully"));
             })
