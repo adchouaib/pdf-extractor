@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>f10b2712-4fbb-4ba8-a418-4b9dd46551cb</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="9.0.3" />
+    <PackageReference Include="OpenAI" Version="2.3.0" />
+    <PackageReference Include="PdfPig" Version="0.1.11" />
+    <PackageReference Include="Pgvector" Version="0.3.2" />
+  </ItemGroup>
+
+</Project>
