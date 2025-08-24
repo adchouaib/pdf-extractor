@@ -5,9 +5,7 @@ namespace PdfExtractor.Api.Data
     public class PdfExtractorContext : DbContext
     {
         public PdfExtractorContext(DbContextOptions<PdfExtractorContext> options)
-            : base(options)
-        {
-        }
+            : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

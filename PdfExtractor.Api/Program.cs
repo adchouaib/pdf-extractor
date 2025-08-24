@@ -7,6 +7,7 @@ builder.Services.AddDbContext(builder.Configuration);
 builder.Services.AddHangfire(builder.Configuration);
 builder.Services.AddBackgroundJobs();
 builder.Services.AddOpenApi();
+builder.Services.AddAiClient(builder.Configuration);
 
 var app = builder.Build();
 

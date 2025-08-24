@@ -8,6 +8,6 @@ namespace PdfExtractor.Api.Document.Entities
         public required string Content { get; set; }
         public required Vector Embedding { get; set; }
         public Guid DocumentId { get; set; }
-        public required Document Document { get; set; }
+        public Document? Document { get; set; }
     }
 }
