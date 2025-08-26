@@ -1,0 +1,22 @@
+﻿@inherits LayoutComponentBase
+
+<FluentToastProvider />
+<FluentDialogProvider />
+<FluentTooltipProvider />
+<FluentMessageBarProvider />
+<FluentMenuProvider />
+
+<main class="container p-0 m-auto bg-white shadow-sm">
+    <FluentHeader>
+        PDF Extractor
+    </FluentHeader>
+    <div class="content p-4">
+        @Body
+    </div>
+</main>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

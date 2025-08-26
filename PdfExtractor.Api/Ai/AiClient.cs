@@ -14,8 +14,8 @@ namespace PdfExtractor.Api.Ai
         public AiClient(IConfiguration configuration)
         {
             // Read the OpenAi Client from Secrets
-            var _apiKey = configuration["OPEN_API_KEY"] ?? string.Empty;
-            _openAiClient = new OpenAIClient(_apiKey);
+            var apiKey = configuration["OPEN_API_KEY"] ?? string.Empty;
+            _openAiClient = new OpenAIClient(apiKey);
         }
 
         /// <summary>

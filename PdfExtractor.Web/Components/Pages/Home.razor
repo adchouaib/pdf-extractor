@@ -1,0 +1,71 @@
+﻿@page "/"
+@using PdfExtractor.Web.Services
+@attribute [StreamRendering]
+@inject PdfExtractorService _pdfExtractorService;
+@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
+@using System.Diagnostics
+
+<PageTitle>Home</PageTitle>
+
+<FluentLabel class="mb-4" Typo="Typography.PageTitle">Documents :</FluentLabel>
+
+@if (documents is null)
+{
+    <div class="d-flex flex-column gap-3" style="width: 100%;">
+        <div class="d-flex align-items-center justify-content-between" style="width: 100%;">
+            <div class="d-flex flex-grow-1 gap-3 align-items-center" style="width: 100%;">
+                <FluentSkeleton Shape="SkeletonShape.Circle"></FluentSkeleton>
+                <div class="flex-grow-1" style="width: 100%;">
+                    <FluentSkeleton style="margin-top: 10px; width: 90%;" Height="10px"></FluentSkeleton>
+                    <FluentSkeleton style="margin-top: 10px; width: 80%;" Height="10px"></FluentSkeleton>
+                </div>
+            </div>
+            <FluentSkeleton style="margin-top: 10px; margin-bottom: 10px;" Width="75px" Height="30px"></FluentSkeleton>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between" style="width: 100%;">
+            <div class="d-flex flex-grow-1 gap-3 align-items-center" style="width: 100%;">
+                <FluentSkeleton Shape="SkeletonShape.Circle"></FluentSkeleton>
+                <div class="flex-grow-1" style="width: 100%;">
+                    <FluentSkeleton style="margin-top: 10px; width: 90%;" Height="10px"></FluentSkeleton>
+                    <FluentSkeleton style="margin-top: 10px; width: 80%;" Height="10px"></FluentSkeleton>
+                </div>
+            </div>
+            <FluentSkeleton style="margin-top: 10px; margin-bottom: 10px;" Width="75px" Height="30px"></FluentSkeleton>
+        </div>
+    </div>
+}
+else
+{
+    <div class="d-flex flex-column gap-3" style="width: 100%;">
+        @foreach (var doc in documents)
+        {
+            <div class="d-flex align-items-center justify-content-between" style="width: 100%;">
+                <div class="d-flex flex-grow-1 gap-3 align-items-top" style="width: 100%;">
+                    <FluentIcon Value="@(new Icons.Regular.Size32.DocumentPdf().WithColor(Color.Neutral))" />
+                    <div class="flex-grow-1" style="width: 100%;">
+                        <FluentLabel Typo="Typography.H5" style="margin-top: 10px; width: 100%;" Height="10px">@doc.fileName
+                        </FluentLabel>
+                        <div style=" width: 90%;" Height="10px">
+                            <FluentBadge Appearance="Appearance.Accent"
+                                BackgroundColor="@(doc.isProcessed == "True" ? "green" : "orange")">
+                                @(doc.isProcessed == "True" ? "Processed" : "Waiting")
+                            </FluentBadge>
+                        </div>
+                    </div>
+                </div>
+                <FluentButton IconStart="@(new Icons.Regular.Size16.Chat())" style="margin-top: 10px; margin-bottom: 10px;"
+                    Width="75px" Height="30px">Chat</FluentButton>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private DocumentListResponse[]? documents;
+
+    protected override async Task OnInitializedAsync()
+    {
+        documents = await _pdfExtractorService.GetDocumentsAsync();
+    }
+}

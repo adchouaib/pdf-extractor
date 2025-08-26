@@ -8,6 +8,7 @@ builder.Services.AddHangfire(builder.Configuration);
 builder.Services.AddBackgroundJobs();
 builder.Services.AddOpenApi();
 builder.Services.AddAiClient(builder.Configuration);
+builder.Services.AddCorsConfig();
 
 var app = builder.Build();
 
@@ -19,6 +20,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAllOrigins");
 app.UseHangfire();
 app.MapDocumentApi();
 
