@@ -6,11 +6,11 @@
 <FluentMessageBarProvider />
 <FluentMenuProvider />
 
-<main class="container p-0 m-auto bg-white shadow-sm">
+<main class="container p-0 m-auto bg-white shadow-sm overflow-hidden">
     <FluentHeader>
         PDF Extractor
     </FluentHeader>
-    <div class="content p-4">
+    <div class="content p-4 h-full" style="overflow-y: scroll; height: 100%">
         @Body
     </div>
 </main>

@@ -1,9 +1,12 @@
 ﻿@page "/"
 @using PdfExtractor.Web.Services
-@attribute [StreamRendering]
-@inject PdfExtractorService _pdfExtractorService;
 @using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
-@using System.Diagnostics
+
+@attribute [StreamRendering]
+@rendermode InteractiveServer
+
+@inject PdfExtractorService _pdfExtractorService;
+@inject NavigationManager _navigationManager;
 
 <PageTitle>Home</PageTitle>
 
@@ -54,8 +57,11 @@ else
                         </div>
                     </div>
                 </div>
+
                 <FluentButton IconStart="@(new Icons.Regular.Size16.Chat())" style="margin-top: 10px; margin-bottom: 10px;"
-                    Width="75px" Height="30px">Chat</FluentButton>
+                    Width="75px" Height="30px" OnClick="@(() => NavigateToChat(doc.id))">
+                    Chat
+                </FluentButton>
             </div>
         }
     </div>
@@ -67,5 +73,10 @@ else
     protected override async Task OnInitializedAsync()
     {
         documents = await _pdfExtractorService.GetDocumentsAsync();
+    }
+
+    private void NavigateToChat(object documentId)
+    {
+        _navigationManager.NavigateTo($"/chat/{documentId}");
     }
 }

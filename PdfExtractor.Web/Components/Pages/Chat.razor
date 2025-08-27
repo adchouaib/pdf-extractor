@@ -1,0 +1,202 @@
+@page "/chat/{id:guid}"
+@using PdfExtractor.Web.Services
+@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
+
+@rendermode InteractiveServer
+
+@inject PdfExtractorService _pdfExtractorService;
+
+<PageTitle>Chat - Document @Id</PageTitle>
+
+<div class="container-fluid h-100 d-flex flex-column">
+    <!-- Header -->
+    <div class="row mb-3">
+        <div class="col">
+            <FluentLabel Typo="Typography.PageTitle" class="d-flex align-items-center gap-2">
+                <FluentIcon Value="@(new Icons.Regular.Size24.Chat())" />
+                Document Chat
+            </FluentLabel>
+            <FluentLabel Typo="Typography.Body">Document ID: @Id</FluentLabel>
+        </div>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="row flex-grow-1 mb-3">
+        <div class="col">
+            <FluentCard class="h-100 d-flex flex-column p-0" style="min-height: 400px;">
+                <div class="card-header bg-light border-bottom" style="padding: 0;">
+                    <FluentLabel Typo="Typography.H6" class="mb-0">
+                        <FluentIcon Value="@(new Icons.Regular.Size16.ChatBubblesQuestion())" class="me-2" />
+                        Messages
+                    </FluentLabel>
+                </div>
+                
+                <div class="flex-grow-1 overflow-auto p-3" style="max-height: 400px;" id="messagesContainer">
+                    @if (!messages.Any())
+                    {
+                        <div class="text-center text-muted py-5">
+                            <FluentIcon Value="@(new Icons.Regular.Size48.ChatEmpty())" class="mb-3 opacity-50" />
+                            <div>No messages yet. Start the conversation!</div>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var message in messages.OrderBy(m => m.SendingDate))
+                        {
+                            <div class="mb-3 d-flex @(message.Sender == "User" ? "justify-content-end" : "justify-content-start")">
+                                <div class="@(message.Sender == "User" ? "ms-5" : "me-5")" style="max-width: 70%;">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        @if(message.Sender == "User")
+                                        {
+                                            <FluentIcon Value="@(new Icons.Regular.Size16.Person())" Color="@(Color.Accent)" />
+                                        }else{
+                                            <FluentIcon Value="@(new Icons.Regular.Size16.Bot())" Color="@(Color.Success)" />
+                                        }
+                                       
+                                        <FluentLabel Typo="Typography.Subject" class="text-muted">
+                                            @message.Sender • @message.SendingDate.ToString("HH:mm")
+                                        </FluentLabel>
+                                    </div>
+                                    <FluentCard class="@(message.Sender == "User" ? "border-primary bg-primary bg-opacity-10" : "border-success bg-success bg-opacity-10")">
+                                        <div class="p-3">
+                                            <FluentLabel>@message.Content</FluentLabel>
+                                        </div>
+                                    </FluentCard>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </FluentCard>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="row">
+        <div class="col">
+            <FluentCard>
+                <div class="p-3">
+                    <div class="d-flex gap-2 align-items-end">
+                        <div class="flex-grow-1">
+                            <FluentLabel class="mb-2">Your Message</FluentLabel>
+                            <FluentTextField
+                                @bind-Value="Message"
+                                @onkeypress="@HandleKeyPress"
+                                Placeholder="Type your message here..."
+                                Resize="TextAreaResize.Vertical"
+                                Rows="2"
+                                class="w-100" 
+                                Disabled="@isLoading"></FluentTextField>
+                        </div>
+                        <FluentButton Appearance="Appearance.Accent" 
+                                    IconStart="@(new Icons.Regular.Size16.Send())"
+                                    OnClick="SendMessage"
+                                    Disabled="@(string.IsNullOrWhiteSpace(Message) || isLoading)"
+                                    Loading="@isLoading"
+                                    class="mb-2">
+                            @(isLoading ? "Sending..." : "Send")
+                        </FluentButton>
+                    </div>
+                    
+                    @if (isLoading)
+                    {
+                        <div class="mt-2">
+                            <FluentProgressRing Size="ProgressSize.Small" />
+                            <FluentLabel Typo="Typography.Subject" class="text-muted ms-2">Processing your message...</FluentLabel>
+                        </div>
+                    }
+                </div>
+            </FluentCard>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container-fluid {
+        padding: 1rem;
+    }
+    
+    #messagesContainer::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    #messagesContainer::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    #messagesContainer::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+    
+    #messagesContainer::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private string Message { get; set; } = String.Empty;
+    private bool isLoading = false;
+    public List<MessageRecord> messages { get; set; } = new List<MessageRecord>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender || messages.Any())
+        {
+            await ScrollToBottom();
+        }
+    }
+
+    private async Task ScrollToBottom()
+    {
+        await Task.Delay(50); // Small delay to ensure DOM is updated
+        await InvokeAsync(StateHasChanged);
+    }
+
+    async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(Message) || isLoading)
+            return;
+
+        var message = Message;
+        messages.Add(new MessageRecord(Message, "User", DateTime.Now));
+        Message = String.Empty;
+        isLoading = true;
+
+        try
+        {
+            var response = await _pdfExtractorService.SendMessage(message, Id);
+            if (response != null)
+            {
+                messages.Add(new MessageRecord(response.response, "Bot", DateTime.Now));
+            }
+            else
+            {
+                messages.Add(new MessageRecord("Sorry, I couldn't process your message. Please try again.", "Bot", DateTime.Now));
+            }
+        }
+        catch (Exception ex)
+        {
+            messages.Add(new MessageRecord($"Error: {ex.Message}", "Bot", DateTime.Now));
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await SendMessage();
+        }
+    }
+
+    public record MessageRecord(string Content, string Sender, DateTime SendingDate);
+}
